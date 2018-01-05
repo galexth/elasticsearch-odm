@@ -1,0 +1,35 @@
+{
+  "name": "galexth/elasticsearch-odm",
+  "description": "elasticsearch odm",
+  "keywords": ["elasticsearch", "odm"],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexander G"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "illuminate/support": "~5.4",
+    "ruflin/elastica": "^5.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~6.1",
+    "mockery/mockery": "0.9.*",
+    "fzaninotto/faker": "~1.6",
+    "kint-php/kint": "^2.1",
+    "monolog/monolog": "^1.22",
+    "illuminate/validation": "~5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Galexth\\ElasticsearchOdm\\": "src/elasticsearch-odm/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Galexth\\ElasticsearchOdm\\Tests\\": "tests/elasticsearch-odm/Tests/"
+    }
+  }
+}
