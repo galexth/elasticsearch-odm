@@ -312,14 +312,20 @@ class Builder
         $this->checkAccess();
 
         if ($id = $this->model->getId()) {
+
             $response = $this->getTypeInstance()->deleteById($id, $this->options);
+
+            return $response->getData()['result'] == 'deleted';
+
         } elseif ($this->getQuery()) {
+
             $response = $this->getTypeInstance()->deleteByQuery($this->getQuery(), $this->options);
+
+            return $response->getData()['deleted'];
+
         } else {
             throw new InvalidException('Invalid query.');
         }
-
-        return $response->getData()['deleted'];
     }
 
     /**
