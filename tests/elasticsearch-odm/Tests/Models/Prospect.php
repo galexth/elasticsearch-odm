@@ -43,7 +43,7 @@ class Prospect extends Model
      */
     public function getIndex(): string
     {
-        return 'test_index_2';
+        return 'salestools_prospector_test_2';
     }
 
     /**
@@ -119,11 +119,11 @@ class Prospect extends Model
         ];
     }
 
-    public function validate(): bool
-    {
-        $validator = new Validator(new Translator(new ArrayLoader(), 'en'), $this->getDirty(), $this->rules());
-        $validator->valid();
-        d($validator->errors());
-    }
+//    public function validate()
+//    {
+//        $validator = new Validator(new Translator(new ArrayLoader(), 'en'), $this->getDirty(), $this->rules());
+//        $validator->valid();
+//        d($validator->errors());
+//    }
 
 }
