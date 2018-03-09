@@ -10,6 +10,55 @@ use Galexth\ElasticsearchOdm\Tests\Models\Prospect;
 
 final class ModelTest extends TestCase
 {
+
+    public function testUpdateTimestamps()
+    {
+        $p = Prospect::first();
+
+        $updatedAt = $p->updated_at;
+
+        $p->touch();
+
+        $this->assertNotEquals($updatedAt, $p->updated_at);
+
+        $updatedAt = $p->updated_at;
+
+        sleep(2);
+
+        $p->update(['first_name' => 'sdfds']);
+
+        $this->assertNotEquals($updatedAt, $p->updated_at);
+    }
+
+    public function testCreateTimestamps()
+    {
+        $p = new Prospect([
+            'first_name' => '123wqe',
+            'last_name' => 'vxvcv',
+        ]);
+
+        $p->save();
+
+        $this->assertNotEmpty($p->created_at, $p->updated_at);
+    }
+
+    public function testCreateWithoutTimestamps()
+    {
+        $p = new Prospect([
+            'first_name' => '123wqe',
+            'last_name' => 'vxvcv',
+        ]);
+        $p->created_at = '2018-03-09 16:56:17';
+        $p->updated_at = '2018-03-09 16:56:17';
+
+        $p->timestamps = false;
+
+        $p->save();
+
+        $this->assertEquals('2018-03-09 16:56:17', $p->created_at);
+        $this->assertEquals('2018-03-09 16:56:17', $p->updated_at);
+    }
+
     public function testAccess()
     {
         $company = Company::query()->first();
