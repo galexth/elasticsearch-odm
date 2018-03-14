@@ -43,4 +43,15 @@ class Scroll extends \Elastica\Scroll
         return $this->_model->newCollection($models, $this->_currentResultSet);
     }
 
+    /**
+     * Returns true if current result set contains at least one hit.
+     *
+     * @link http://php.net/manual/en/iterator.valid.php
+     *
+     * @return bool
+     */
+    public function valid()
+    {
+        return $this->_nextScrollId !== null && $this->_currentResultSet->count();
+    }
 }
