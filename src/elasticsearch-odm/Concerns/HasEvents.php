@@ -17,11 +17,11 @@ trait HasEvents
      */
     protected function fireModelEvent($event)
     {
-        if (! isset(static::$events[$event])) {
+        if (! isset(static::$events[static::getEventName($event)])) {
             return;
         }
 
-        $result = static::$events[$event]($this);
+        $result = static::$events[static::getEventName($event)]($this);
 
         if (! is_null($result)) {
             return $result;
@@ -39,7 +39,17 @@ trait HasEvents
      */
     protected static function registerModelEvent(string $event, callable $callback)
     {
-        static::$events[$event] = $callback;
+        static::$events[static::getEventName($event)] = $callback;
+    }
+
+    /**
+     * @param string $event
+     *
+     * @return string
+     */
+    protected static function getEventName(string $event)
+    {
+        return "document.{$event}: " . static::class;
     }
 
     /**
