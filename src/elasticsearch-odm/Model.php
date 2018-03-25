@@ -2,6 +2,7 @@
 
 namespace Galexth\ElasticsearchOdm;
 
+use ArrayAccess;
 use DateTimeInterface;
 use Elastica\Result;
 use Elastica\ResultSet;
@@ -20,7 +21,7 @@ use Galexth\ElasticsearchOdm\Exceptions\MassAssignmentException;
 /**
  * @mixin \Galexth\ElasticsearchOdm\Builder
  */
-abstract class Model implements Arrayable, Jsonable, JsonSerializable
+abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 {
     use HasEvents;
     use HasTimestamps;
@@ -1303,6 +1304,51 @@ abstract class Model implements Arrayable, Jsonable, JsonSerializable
     public function toJson($options = 0)
     {
         return json_encode($this->jsonSerialize(), $options);
+    }
+
+    /**
+     * Determine if the given attribute exists.
+     *
+     * @param  mixed  $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return ! is_null($this->getAttribute($offset));
+    }
+
+    /**
+     * Get the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return $this->getAttribute($offset);
+    }
+
+    /**
+     * Set the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @param  mixed  $value
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->setAttribute($offset, $value);
+    }
+
+    /**
+     * Unset the value for a given offset.
+     *
+     * @param  mixed  $offset
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->attributes[$offset], $this->relations[$offset]);
     }
 
     /**
