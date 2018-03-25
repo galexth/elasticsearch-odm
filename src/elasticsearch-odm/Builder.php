@@ -330,11 +330,25 @@ class Builder
 
     /**
      * @param array $fields
-     * @return Model
+     * @return \Galexth\ElasticsearchOdm\Model|static
      */
     public function first(array $fields = [])
     {
         return $this->setSize(1)->get($fields)->first();
+    }
+
+    /**
+     * @param array $fields
+     *
+     * @return \Galexth\ElasticsearchOdm\Model|static
+     */
+    public function firstOrNew(array $fields = [])
+    {
+        if (! $model = $this->first()) {
+            $model = $this->model->newInstance();
+        }
+
+        return $model;
     }
 
     /**
@@ -374,7 +388,7 @@ class Builder
 
     /**
      * @param mixed $id
-     * @return Model
+     * @return \Galexth\ElasticsearchOdm\Model|static
      */
     public function findOrNew($id)
     {
