@@ -290,7 +290,7 @@ class Builder
      * @param array $body
      * @param array $params
      *
-     * @return bool
+     * @return int
      */
     public function updateByQuery(array $body, array $params = [])
     {
@@ -300,7 +300,9 @@ class Builder
         $endpoint->setBody($body);
         $endpoint->setParams(array_merge($this->options, $params));
 
-        return $this->getTypeInstance()->requestEndpoint($endpoint)->isOk();
+        $response = $this->getTypeInstance()->requestEndpoint($endpoint);
+
+        return $response->getData()['updated'];
     }
 
     /**
@@ -340,11 +342,26 @@ class Builder
     /**
      * @param array $fields
      *
+     * @return \Galexth\ElasticsearchOdm\Builder|\Galexth\ElasticsearchOdm\Model
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\DocumentNotFoundException
+     */
+    public function firstOrFail(array $fields = [])
+    {
+        if (! $model = $this->first($fields)) {
+            throw new DocumentNotFoundException('Document not found.');
+        }
+
+        return $model;
+    }
+
+    /**
+     * @param array $fields
+     *
      * @return \Galexth\ElasticsearchOdm\Model|static
      */
     public function firstOrNew(array $fields = [])
     {
-        if (! $model = $this->first()) {
+        if (! $model = $this->first($fields)) {
             $model = $this->model->newInstance();
         }
 
@@ -373,9 +390,10 @@ class Builder
     }
 
     /**
-     * @param mixed $id
+     * @param $id
+     *
+     * @return \Galexth\ElasticsearchOdm\Model|null
      * @throws \Galexth\ElasticsearchOdm\Exceptions\DocumentNotFoundException
-     * @return Model
      */
     public function findOrFail($id)
     {
