@@ -374,7 +374,7 @@ class Builder
      */
     public function find($id)
     {
-        $set = $this->getSearchInstance()->search(new Query\Ids(null, [$id]), ['limit' => 1]);
+        $set = $this->getSearchInstance()->search(new Query\Ids([$id]), ['limit' => 1]);
 
         if (! $set->count()) {
             return null;
