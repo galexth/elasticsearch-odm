@@ -1,10 +1,12 @@
 Elastic ODM
 
 ```php
-$query = Person::query()->with([
-    'relation1' => function (Query $query) {
-        $query->setSource(['field1', 'field2', 'field3']);
-    }
+$doc = Document::setQuery(
+    (new BoolQuery())->addFilter(new Term(['field' => $field]))
+        ->addFilter(new Term(['field2' => $field2]))
+)->firstOrFail();
+
+$doc->delete();
 ]);
 ```
 Get documents collection with filtered _source
