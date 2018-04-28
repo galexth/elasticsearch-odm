@@ -237,10 +237,6 @@ class Builder
 
         $models = $this->get();
 
-        if ($this->with) {
-            $models = $this->loadRelations($models);
-        }
-
         return new OffsetPaginator($models, $from, $size, $models->getTotal());
     }
 
@@ -453,7 +449,7 @@ class Builder
      */
     protected function getRelation(string $name)
     {
-        $method = 'get'. ucfirst($name) . 'relation';
+        $method = 'get'. ucfirst($name) . 'Relation';
 
         return $this->model->{$method}();
     }
