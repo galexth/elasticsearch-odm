@@ -342,7 +342,7 @@ final class ModelTest extends TestCase
         $collection = Prospect::query()->setSize(3)->ids();
 
         $response = Prospect::query()->setQuery(
-            new Ids(null, $collection->toArray())
+            new Ids($collection->toArray())
         )->conflicts()->delete();
 
         $this->assertEquals(3, $response);

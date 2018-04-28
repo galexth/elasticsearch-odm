@@ -7,6 +7,7 @@ use DateTimeInterface;
 use Elastica\Result;
 use Elastica\ResultSet;
 use Galexth\ElasticsearchOdm\Concerns\HasTimestamps;
+use Galexth\ElasticsearchOdm\Concerns\ValidatesAttributes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Carbon;
@@ -26,16 +27,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     use HasEvents;
     use HasTimestamps;
     use GuardsAttributes;
+    use ValidatesAttributes;
 
     /**
      * @var \Elastica\Client
      */
     protected static $client;
-
-    /**
-     * @var \Illuminate\Support\MessageBag
-     */
-    protected $validationErrors;
 
     /**
      * @var string
@@ -65,7 +62,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     /**
      * @var bool
      */
-    protected $mergeRelations = true;
+    protected $mergeRelations = false;
 
     /**
      * The name of the "created at" column.
@@ -215,8 +212,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @param string                         $relation
-     * @param \Illuminate\Support\Collection $models
+     * @param string                               $relation
+     * @param \Galexth\ElasticsearchOdm\Collection $models
      *
      * @return \Galexth\ElasticsearchOdm\Model
      */
@@ -550,22 +547,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @return array
-     */
-    public function rules(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return void
-     */
-    public function validate()
-    {
-        //
-    }
-
-    /**
      * Perform a model update operation.
      *
      * @param \Galexth\ElasticsearchOdm\Builder $query
@@ -721,39 +702,24 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     protected function asDateTime($value)
     {
-        // If this value is already a Carbon instance, we shall just return it as is.
-        // This prevents us having to re-instantiate a Carbon instance when we know
-        // it already is one, which wouldn't be fulfilled by the DateTime check.
         if ($value instanceof Carbon) {
             return $value;
         }
 
-        // If the value is already a DateTime instance, we will just skip the rest of
-        // these checks since they will be a waste of time, and hinder performance
-        // when checking the field. We will just return the DateTime right away.
         if ($value instanceof DateTimeInterface) {
             return new Carbon(
                 $value->format('Y-m-d H:i:s.u'), $value->getTimezone()
             );
         }
 
-        // If this value is an integer, we will assume it is a UNIX timestamp's value
-        // and format a Carbon object from this timestamp. This allows flexibility
-        // when defining your date fields as they might be UNIX timestamps here.
         if (is_numeric($value)) {
             return Carbon::createFromTimestamp($value);
         }
 
-        // If the value is in simply year, month, day format, we will instantiate the
-        // Carbon instances from that format. Again, this provides for simple date
-        // fields on the database, while still supporting Carbonized conversion.
         if ($this->isStandardDateFormat($value)) {
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
         }
 
-        // Finally, we will just assume this date is in the format used by default on
-        // the database connection and use that format to create the Carbon object
-        // that is returned back out to the developers after we convert it here.
         return Carbon::createFromFormat(
             str_replace('.v', '.u', $this->getDateFormat()), $value
         );
@@ -1365,22 +1331,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function isReadOnly(): bool
     {
         return $this->readOnly;
-    }
-
-    /**
-     * @return \Illuminate\Support\MessageBag
-     */
-    public function getValidationErrors(): \Illuminate\Support\MessageBag
-    {
-        return $this->validationErrors;
-    }
-
-    /**
-     * @param \Illuminate\Support\MessageBag $validationErrors
-     */
-    public function setValidationErrors(\Illuminate\Support\MessageBag $validationErrors)
-    {
-        $this->validationErrors = $validationErrors;
     }
 
 }

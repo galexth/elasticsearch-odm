@@ -7,9 +7,16 @@ use Galexth\ElasticsearchOdm\Model;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @var Client
+     */
+    protected $client;
+
     public static function setUpBeforeClass()
     {
-        Model::setClient(new Client());
+        $client = new Client();
+
+        Model::setClient($client);
 
         \Kint::$max_depth = 10;
     }

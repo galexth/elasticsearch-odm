@@ -3,9 +3,7 @@
 namespace Galexth\ElasticsearchOdm\Tests\Models;
 
 
-use Galexth\ElasticsearchOdm\Model;
-
-class Company extends Model
+class Company extends BaseModel
 {
     /**
      * @var string
@@ -14,11 +12,4 @@ class Company extends Model
 
     protected $readOnly = true;
 
-    /**
-     * @return string
-     */
-    public function getIndex(): string
-    {
-        return 'test_index_2';
-    }
 }
