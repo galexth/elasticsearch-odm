@@ -50,7 +50,7 @@ class Arrayed extends Relation
             return new Collection();
         }
 
-        return $this->query->setQuery(new Ids(null, $ids))->get();
+        return $this->query->setQuery(new Ids($ids))->get();
     }
 
     /**

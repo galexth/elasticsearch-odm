@@ -170,7 +170,7 @@ class Builder
 
         $models = $this->model::hydrate($set->getResults(), true);
 
-        if ($this->with && ! $this->getParam('_source') !== false) {
+        if ($this->with) {
             $models = $this->loadRelations($models);
         }
 
