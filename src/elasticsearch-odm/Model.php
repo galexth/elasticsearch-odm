@@ -456,11 +456,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $model = new static($attributes);
 
-        $model->exists = $exists;
-
-        if ($exists && ! $model->_id = $id) {
+        if ($exists && ! $id) {
             throw new InvalidException('_id must be set.');
         }
+
+        $model->exists = $exists;
+        $model->_id = $id;
 
         return $model;
     }
@@ -509,7 +510,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             return $model->update($attributes, $options);
         }
 
-        return $instance->newInstance(array_merge($attributes, ['id' => $id]))->save(true, $options);
+        return $instance->newInstance($attributes, false, $id)
+            ->save(true, $options);
     }
 
     /**
@@ -601,7 +603,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             $this->updateTimestamps();
         }
 
-        $response = $query->create($this->attributes);
+        $response = $this->_id
+            ? $query->create($this->attributes, $this->_id)
+            : $query->index($this->attributes);
 
         if (! $response->isOk()) {
             return false;
@@ -1331,6 +1335,14 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function isReadOnly(): bool
     {
         return $this->readOnly;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId(string $id)
+    {
+        $this->_id = $id;
     }
 
 }

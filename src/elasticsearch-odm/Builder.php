@@ -244,20 +244,36 @@ class Builder
     /**
      * Perform a model insert operation.
      *
+     * @param array  $attributes
+     * @param string $id
+     *
+     * @return \Elastica\Response
+     */
+    public function create(array $attributes = [], string $id)
+    {
+        $this->checkAccess();
+
+        $endpoint = new \Elasticsearch\Endpoints\Create();
+
+        $endpoint->setID($id);
+        $endpoint->setBody($attributes);
+        $endpoint->setParams($this->options);
+
+        return $this->getTypeInstance()->requestEndpoint($endpoint);
+    }
+
+    /**
+     * Perform a model insert operation.
+     *
      * @param array $attributes
      *
      * @return \Elastica\Response
      */
-    public function create(array $attributes = [])
+    public function index(array $attributes = [])
     {
         $this->checkAccess();
 
         $endpoint = new \Elasticsearch\Endpoints\Index();
-
-        if (! empty($attributes['id'])) {
-            $endpoint->setID($attributes['id']);
-            unset($attributes['id']);
-        }
 
         $endpoint->setBody($attributes);
         $endpoint->setParams($this->options);
