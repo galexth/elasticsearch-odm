@@ -4,6 +4,7 @@ namespace Galexth\ElasticsearchOdm;
 
 use Elastica\Client;
 use Elastica\Query;
+use Elastica\Result;
 use Elasticsearch\Endpoints\UpdateByQuery;
 use Galexth\ElasticsearchOdm\Exceptions\AccessDenied;
 use Galexth\ElasticsearchOdm\Exceptions\DocumentNotFoundException;
@@ -255,6 +256,7 @@ class Builder
 
         if (! empty($attributes['id'])) {
             $endpoint->setID($attributes['id']);
+            unset($attributes['id']);
         }
 
         $endpoint->setBody($attributes);
@@ -366,17 +368,23 @@ class Builder
 
     /**
      * @param int|string $id
-     * @return Model|null
+     * @param array      $options
+     *
+     * @return \Galexth\ElasticsearchOdm\Model|null
      */
-    public function find($id)
+    public function find($id, array $options = [])
     {
-        $set = $this->getSearchInstance()->search(new Query\Ids([$id]), ['limit' => 1]);
+        $endpoint = new \Elasticsearch\Endpoints\Get();
+        $endpoint->setID($id);
+        $endpoint->setParams(array_merge($this->options, $options));
 
-        if (! $set->count()) {
+        $response = $this->getTypeInstance()->requestEndpoint($endpoint);
+
+        if (! $response->isOk()) {
             return null;
         }
 
-        $model = $this->model->newFromBuilder(current($set->getResults()));
+        $model = $this->model->newFromBuilder(new Result($response->getData()));
 
         if ($this->with) {
             $model = $model->newCollection($this->loadRelations([$model]))->first();
