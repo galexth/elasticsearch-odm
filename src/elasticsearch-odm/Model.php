@@ -1345,4 +1345,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         $this->_id = $id;
     }
 
+    /**
+     * @return int
+     */
+    public function version(): int
+    {
+        return $this->_version;
+    }
+
 }
