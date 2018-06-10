@@ -99,9 +99,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     protected $_score;
 
     /**
-     * @var int
+     * @var int|null
      */
-    protected $_version;
+    protected $_version = null;
 
     /**
      * @var \Illuminate\Support\Collection
@@ -572,7 +572,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             $response = $query->updateById(['doc' => $dirty], $this->getId());
 
             if ($response->isOk()) {
-                $this->_version = $response->getData()['_version'];
+                $this->_version = $response->getData()['_version'] ?: null;
 
                 $this->fireModelEvent('updated');
 
@@ -615,7 +615,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         $this->wasRecentlyCreated = true;
 
         $this->_id = $response->getData()['_id'];
-        $this->_version = $response->getData()['_version'];
+        $this->_version = $response->getData()['_version'] ?: null;
 
         $this->fireModelEvent('created');
 
@@ -763,7 +763,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         $model->setRawAttributes($result->getSource(), true);
 
         $model->_score = $result->getScore();
-        $model->_version = $result->getVersion();
+        $model->_version = $result->getVersion() ?: null;
         $model->_innerHits = $this->buildInnerHits($result);
 
         return $model;
@@ -1346,9 +1346,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function version(): int
+    public function version()
     {
         return $this->_version;
     }
