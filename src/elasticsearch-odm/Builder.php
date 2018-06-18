@@ -217,6 +217,14 @@ class Builder
     }
 
     /**
+     * @return int
+     */
+    public function exists()
+    {
+        return (bool) $this->count();
+    }
+
+    /**
      * @return Collection
      */
     public function ids()
