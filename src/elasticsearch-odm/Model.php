@@ -15,7 +15,6 @@ use Illuminate\Support\Collection as BaseCollection;
 use JsonSerializable;
 use Galexth\ElasticsearchOdm\Concerns\GuardsAttributes;
 use Galexth\ElasticsearchOdm\Concerns\HasEvents;
-use Galexth\ElasticsearchOdm\Exceptions\ClientEmptyException;
 use Galexth\ElasticsearchOdm\Exceptions\InvalidException;
 use Galexth\ElasticsearchOdm\Exceptions\MassAssignmentException;
 
@@ -30,9 +29,18 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     use ValidatesAttributes;
 
     /**
-     * @var \Elastica\Client
+     * The connection resolver instance.
+     *
+     * @var \Galexth\ElasticsearchOdm\ConnectionResolverInterface
      */
-    protected static $client;
+    protected static $resolver;
+
+    /**
+     * The connection name for the model.
+     *
+     * @var string
+     */
+    protected $connection;
 
     /**
      * @var string
@@ -58,11 +66,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      * @var bool
      */
     public $wasRecentlyCreated = false;
-
-    /**
-     * @var bool
-     */
-    protected $mergeRelations = false;
 
     /**
      * The name of the "created at" column.
@@ -259,14 +262,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @param \Elastica\Client $client
-     */
-    public static function setClient(\Elastica\Client $client)
-    {
-        static::$client = $client;
-    }
-
-    /**
      * @return Builder
      */
     public static function query()
@@ -275,26 +270,11 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @throws ClientEmptyException
      * @return Builder
      */
     public function newBuilder()
     {
-        $client = $this->getClient();
-
-        if (! static::$client) {
-            throw new ClientEmptyException('Client is not set.');
-        }
-
-        return new Builder($this, $client);
-    }
-
-    /**
-     * @return \Elastica\Client
-     */
-    public function getClient()
-    {
-        return static::$client;
+        return new Builder($this->getConnection(), $this);
     }
 
     /**
@@ -1351,6 +1331,71 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function version()
     {
         return $this->_version;
+    }
+
+    /**
+     * Get the database connection for the model.
+     *
+     * @return \Elastica\Client
+     */
+    public function getConnection()
+    {
+        return static::resolveConnection($this->getConnectionName());
+    }
+
+    /**
+     * Get the current connection name for the model.
+     *
+     * @return string
+     */
+    public function getConnectionName()
+    {
+        return $this->connection;
+    }
+
+    /**
+     * Set the connection associated with the model.
+     *
+     * @param  string  $name
+     * @return $this
+     */
+    public function setConnection($name)
+    {
+        $this->connection = $name;
+
+        return $this;
+    }
+
+    /**
+     * Resolve a connection instance.
+     *
+     * @param  string|null  $connection
+     * @return \Elastica\Client
+     */
+    public static function resolveConnection($connection = null)
+    {
+        return static::$resolver->connection($connection);
+    }
+
+    /**
+     * Get the connection resolver instance.
+     *
+     * @return \Galexth\ElasticsearchOdm\ConnectionResolverInterface
+     */
+    public static function getConnectionResolver()
+    {
+        return static::$resolver;
+    }
+
+    /**
+     * Set the connection resolver instance.
+     *
+     * @param  \Galexth\ElasticsearchOdm\ConnectionResolverInterface  $resolver
+     * @return void
+     */
+    public static function setConnectionResolver(ConnectionResolverInterface $resolver)
+    {
+        static::$resolver = $resolver;
     }
 
 }

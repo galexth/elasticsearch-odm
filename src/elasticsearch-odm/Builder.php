@@ -18,7 +18,7 @@ class Builder
     /**
      * @var Client
      */
-    protected $client;
+    protected $connection;
 
     /**
      * @var Query
@@ -43,12 +43,12 @@ class Builder
     /**
      * Builder constructor.
      *
+     * @param \Elastica\Client     $connection
      * @param \Galexth\ElasticsearchOdm\Model $model
-     * @param \Elastica\Client     $client
      */
-    public function __construct(Model $model, Client $client)
+    public function __construct(Client $connection, Model $model)
     {
-        $this->client = $client;
+        $this->connection = $connection;
         $this->query = new Query();
         $this->model = $model;
     }
@@ -183,7 +183,7 @@ class Builder
      */
     protected function getSearchInstance()
     {
-        return $this->client->getIndex($this->model->getIndex())
+        return $this->connection->getIndex($this->model->getIndex())
             ->getType($this->model->getType())->createSearch();
     }
 
@@ -192,7 +192,7 @@ class Builder
      */
     protected function getTypeInstance()
     {
-        return $this->client->getIndex($this->model->getIndex())
+        return $this->connection->getIndex($this->model->getIndex())
             ->getType($this->model->getType());
     }
 
@@ -299,7 +299,7 @@ class Builder
     {
         $this->checkAccess();
 
-        $response = $this->client->updateDocument($id, $attributes,
+        $response = $this->connection->updateDocument($id, $attributes,
             $this->model->getIndex(),
             $this->model->getType(),
             $this->options
