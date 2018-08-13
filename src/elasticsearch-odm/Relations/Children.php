@@ -26,7 +26,8 @@ class Children extends Relation
             return new Collection();
         }
 
-        return $this->query->setQuery(new HasParent(new Terms('_id', $ids), $this->related->getType()))->get();
+        return $this->query->setQuery(new HasParent(new Terms('_id', $ids), $this->related->getType()))
+            ->setSize(count($ids))->get();
     }
 
     /**

@@ -50,7 +50,7 @@ class Nested extends Relation
             return collect([]);
         }
 
-        return $this->query->setQuery(new Ids($ids))->get();
+        return $this->query->setQuery(new Ids($ids))->setSize(count($ids))->get();
     }
 
     /**
