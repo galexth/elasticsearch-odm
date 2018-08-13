@@ -569,7 +569,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
                 $this->updateTimestamps();
             }
 
-            $response = $query->updateById(['doc' => $dirty], $this->getId());
+            $response = $query->updateById($this->getId(), ['doc' => $dirty]);
 
             if ($response->isOk()) {
                 $this->_version = $response->getData()['_version'] ?: null;
@@ -604,7 +604,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         }
 
         $response = $this->_id
-            ? $query->create($this->attributes, $this->_id)
+            ? $query->create($this->_id, $this->attributes)
             : $query->index($this->attributes);
 
         if (! $response->isOk()) {

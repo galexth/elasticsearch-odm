@@ -217,7 +217,7 @@ class Builder
     }
 
     /**
-     * @return int
+     * @return bool
      */
     public function exists()
     {
@@ -252,12 +252,12 @@ class Builder
     /**
      * Perform a model insert operation.
      *
-     * @param array  $attributes
      * @param string $id
+     * @param array  $attributes
      *
      * @return \Elastica\Response
      */
-    public function create(array $attributes = [], string $id)
+    public function create(string $id, array $attributes)
     {
         $this->checkAccess();
 
@@ -277,7 +277,7 @@ class Builder
      *
      * @return \Elastica\Response
      */
-    public function index(array $attributes = [])
+    public function index(array $attributes)
     {
         $this->checkAccess();
 
@@ -290,12 +290,12 @@ class Builder
     }
 
     /**
-     * @param array  $attributes
      * @param string $id
+     * @param array  $attributes
      *
      * @return \Elastica\Response
      */
-    public function updateById(array $attributes = [], string $id)
+    public function updateById(string $id, array $attributes)
     {
         $this->checkAccess();
 
@@ -328,8 +328,9 @@ class Builder
     }
 
     /**
-     * @return int
-     * @throws \Exception
+     * @return bool
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\InvalidException
      */
     public function delete()
     {
