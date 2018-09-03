@@ -85,4 +85,15 @@ class Collection extends \Illuminate\Support\Collection
             $model->setHidden($attributes);
         });
     }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function keyById()
+    {
+        return parent::keyBy(function ($item) {
+            /** @var \Galexth\ElasticsearchOdm\Model $item */
+            return $item->getId();
+        });
+    }
 }
