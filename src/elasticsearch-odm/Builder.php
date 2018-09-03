@@ -58,14 +58,15 @@ class Builder
      */
     public function withoutSource()
     {
-        return $this->withSource(false);
+        return $this->setSource(false);
     }
 
     /**
      * @param bool $with
+     * @deprecated
      * @return $this
      */
-    public function withSource($with = true)
+    public function withSource($with = [])
     {
         $this->query->setSource($with);
         return $this;
@@ -73,12 +74,55 @@ class Builder
 
     /**
      * @param array|bool $fields
+     * @deprecated
      * @return $this
      */
     public function fields($fields)
     {
         $this->query->setSource($fields);
         return $this;
+    }
+
+    /**
+     * @param array $fields
+     *
+     * @return $this
+     */
+    public function include(array $fields)
+    {
+        $source = $this->getSourceParam();
+
+        $source['includes'] = $fields;
+
+        $this->query->setSource($source);
+        return $this;
+    }
+
+    /**
+     * @param array $fields
+     *
+     * @return $this
+     */
+    public function exclude(array $fields)
+    {
+        $source = $this->getSourceParam();
+
+        $source['excludes'] = $fields;
+
+        $this->query->setSource($source);
+        return $this;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    protected function getSourceParam()
+    {
+        if ($this->query->hasParam('_source')) {
+            return $this->query->getParam('_source');
+        }
+
+        return null;
     }
 
     /**
@@ -164,7 +208,7 @@ class Builder
     public function get(array $fields = [])
     {
         if ($fields) {
-            $this->fields($fields);
+            $this->setSource($fields);
         }
 
         $set = $this->getSearchInstance()->search($this->getQuery());
