@@ -93,7 +93,7 @@ final class ModelTest extends TestCase
         $this->assertInstanceOf(Prospect::class, $collection->first());
         $this->assertEmpty($collection->first()->getAttributes());
 
-        $collection = Prospect::query()->setSize(10)->withSource(false)->get();
+        $collection = Prospect::query()->setSize(10)->withoutSource()->get();
 
         $this->assertNotEmpty($collection, 'Collection is empty');
         $this->assertInstanceOf(Collection::class, $collection);
@@ -178,7 +178,7 @@ final class ModelTest extends TestCase
         $this->assertInstanceOf(Prospect::class, $model);
         $this->assertEmpty($model->getAttributes());
 
-        $model = Prospect::query()->setSize(10)->withSource(false)->first();
+        $model = Prospect::query()->setSize(10)->withoutSource()->first();
 
         $this->assertNotEmpty($model, 'Model is empty');
         $this->assertInstanceOf(Prospect::class, $model);
@@ -229,7 +229,7 @@ final class ModelTest extends TestCase
         $this->assertInstanceOf(Prospect::class, $model);
         $this->assertEmpty($model->getAttributes());
 
-        $model = Prospect::query()->setRawQuery($q)->setSize(10)->withSource(false)->first();
+        $model = Prospect::query()->setRawQuery($q)->setSize(10)->withoutSource()->first();
 
         $this->assertNotEmpty($model, 'Model is empty');
         $this->assertInstanceOf(Prospect::class, $model);

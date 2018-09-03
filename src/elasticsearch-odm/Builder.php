@@ -62,17 +62,6 @@ class Builder
     }
 
     /**
-     * @param bool $with
-     * @deprecated
-     * @return $this
-     */
-    public function withSource($with = [])
-    {
-        $this->query->setSource($with);
-        return $this;
-    }
-
-    /**
      * @param array|bool $fields
      * @deprecated
      * @return $this
