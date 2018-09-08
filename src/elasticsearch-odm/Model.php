@@ -416,11 +416,11 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * Delete a document.
-     *
      * @param array $options
      *
      * @return bool
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\ClientEmptyException
      * @throws \Galexth\ElasticsearchOdm\Exceptions\InvalidException
      */
     public function delete(array $options = [])
@@ -433,7 +433,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             return false;
         }
 
-        $this->newBuilder()->setOptions($options)->delete();
+        $this->newBuilder()->delete($this->getId(), $options);
 
         $this->exists = false;
 
@@ -532,12 +532,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             $this->validate();
         }
 
-        $builder = $this->newBuilder()->setOptions($options);
+        $builder = $this->newBuilder();
 
         if ($this->exists) {
-            $saved = $this->performUpdate($builder);
+            $saved = $this->performUpdate($builder, $options);
         } else {
-            $saved = $this->performInsert($builder);
+            $saved = $this->performInsert($builder, $options);
         }
 
         if ($saved) {
@@ -552,10 +552,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      * Perform a model update operation.
      *
      * @param \Galexth\ElasticsearchOdm\Builder $query
+     * @param array                             $options
      *
      * @return bool
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    protected function performUpdate(Builder $query)
+    protected function performUpdate(Builder $query, array $options = [])
     {
         if ($this->fireModelEvent('updating') === false) {
             return false;
@@ -569,7 +571,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
                 $this->updateTimestamps();
             }
 
-            $response = $query->updateById($this->getId(), ['doc' => $dirty]);
+            $response = $query->updateById($this->getId(), ['doc' => $dirty], $options);
 
             if ($response->isOk()) {
                 $this->_version = $response->getData()['_version'] ?: null;
@@ -590,10 +592,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      * Perform a model insert operation.
      *
      * @param \Galexth\ElasticsearchOdm\Builder $query
+     * @param array                             $options
      *
      * @return bool
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    protected function performInsert(Builder $query)
+    protected function performInsert(Builder $query, array $options = [])
     {
         if ($this->fireModelEvent('creating') === false) {
             return false;
@@ -604,8 +608,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         }
 
         $response = $this->_id
-            ? $query->create($this->_id, $this->attributes)
-            : $query->index($this->attributes);
+            ? $query->create($this->_id, $this->attributes, $options)
+            : $query->index($this->attributes, $options);
 
         if (! $response->isOk()) {
             return false;

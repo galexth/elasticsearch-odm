@@ -36,11 +36,6 @@ class Builder
     protected $with = [];
 
     /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
      * Builder constructor.
      *
      * @param \Galexth\ElasticsearchOdm\Model $model
@@ -115,48 +110,6 @@ class Builder
     }
 
     /**
-     * @param bool $value
-     *
-     * @return $this
-     */
-    public function setRefresh(bool $value = true)
-    {
-        $this->addOption('refresh', $value);
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function setWaitFor()
-    {
-        $this->addOption('refresh', 'wait_for');
-        return $this;
-    }
-
-    /**
-     * @param int $value
-     *
-     * @return $this
-     */
-    public function retryOnConflict(int $value = 1)
-    {
-        $this->addOption('retry_on_conflict', $value);
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function conflicts(string $value = 'proceed')
-    {
-        $this->addOption('conflicts', $value);
-        return $this;
-    }
-
-    /**
      * @param array $with
      * @return $this
      */
@@ -212,21 +165,20 @@ class Builder
     }
 
     /**
-     * @return \Elastica\Search
-     */
-    protected function getSearchInstance()
-    {
-        return $this->client->getIndex($this->model->getIndex())
-            ->getType($this->model->getType())->createSearch();
-    }
-
-    /**
      * @return \Elastica\Type
      */
     protected function getTypeInstance()
     {
         return $this->client->getIndex($this->model->getIndex())
             ->getType($this->model->getType());
+    }
+
+    /**
+     * @return \Elastica\Search
+     */
+    protected function getSearchInstance()
+    {
+        return $this->getTypeInstance()->createSearch();
     }
 
     /**
@@ -287,10 +239,12 @@ class Builder
      *
      * @param string $id
      * @param array  $attributes
+     * @param array  $options
      *
      * @return \Elastica\Response
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    public function create(string $id, array $attributes)
+    public function create(string $id, array $attributes, array $options = [])
     {
         $this->checkAccess();
 
@@ -298,7 +252,7 @@ class Builder
 
         $endpoint->setID($id);
         $endpoint->setBody($attributes);
-        $endpoint->setParams($this->options);
+        $endpoint->setParams($options);
 
         return $this->getTypeInstance()->requestEndpoint($endpoint);
     }
@@ -307,17 +261,19 @@ class Builder
      * Perform a model insert operation.
      *
      * @param array $attributes
+     * @param array $options
      *
      * @return \Elastica\Response
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    public function index(array $attributes)
+    public function index(array $attributes, array $options = [])
     {
         $this->checkAccess();
 
         $endpoint = new \Elasticsearch\Endpoints\Index();
 
         $endpoint->setBody($attributes);
-        $endpoint->setParams($this->options);
+        $endpoint->setParams($options);
 
         return $this->getTypeInstance()->requestEndpoint($endpoint);
     }
@@ -325,35 +281,46 @@ class Builder
     /**
      * @param string $id
      * @param array  $attributes
+     * @param array  $options
      *
      * @return \Elastica\Response
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    public function updateById(string $id, array $attributes)
+    public function updateById(string $id, array $attributes, array $options = [])
     {
         $this->checkAccess();
 
         $response = $this->client->updateDocument($id, $attributes,
-            $this->model->getIndex(),
-            $this->model->getType(),
-            $this->options
+            $this->model->getIndex(), $this->model->getType(), $options
         );
 
         return $response;
     }
 
     /**
-     * @param array $body
+     * @param array $script
      * @param array $params
      *
-     * @return int
+     * @return mixed
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
+     * @throws \Galexth\ElasticsearchOdm\Exceptions\InvalidException
      */
-    public function updateByQuery(array $body, array $params = [])
+    public function update(array $script, array $params = [])
     {
         $this->checkAccess();
 
+        if (! $this->getQuery()->count()) {
+            throw new InvalidException('Invalid query.');
+        }
+
+        $body = [
+            'query' => $this->getQuery()->getQuery()->toArray(),
+            'script' => $script,
+        ];
+
         $endpoint = new UpdateByQuery();
         $endpoint->setBody($body);
-        $endpoint->setParams(array_merge($this->options, $params));
+        $endpoint->setParams($params);
 
         $response = $this->getTypeInstance()->requestEndpoint($endpoint);
 
@@ -361,29 +328,26 @@ class Builder
     }
 
     /**
+     * @param string|null $id
+     * @param array       $params
+     *
      * @return bool
      * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      * @throws \Galexth\ElasticsearchOdm\Exceptions\InvalidException
      */
-    public function delete()
+    public function delete(string $id = null, array $params = [])
     {
         $this->checkAccess();
 
-        if ($id = $this->model->getId()) {
-
-            $response = $this->getTypeInstance()->deleteById($id, $this->options);
-
-            return $response->getData()['result'] == 'deleted';
-
-        } elseif ($this->getQuery()) {
-
-            $response = $this->getTypeInstance()->deleteByQuery($this->getQuery(), $this->options);
-
-            return $response->getData()['deleted'];
-
+        if ($id) {
+            $response = $this->getTypeInstance()->deleteById($id, $params);
+        } elseif ($this->getQuery()->count()) {
+            $response = $this->getTypeInstance()->deleteByQuery($this->getQuery(), $params);
         } else {
             throw new InvalidException('Invalid query.');
         }
+
+        return $response->getData()['deleted'];
     }
 
     /**
@@ -434,7 +398,7 @@ class Builder
     {
         $endpoint = new \Elasticsearch\Endpoints\Get();
         $endpoint->setID($id);
-        $endpoint->setParams(array_merge($this->options, $options));
+        $endpoint->setParams($options);
 
         $response = $this->getTypeInstance()->requestEndpoint($endpoint);
 
@@ -577,32 +541,6 @@ class Builder
     public function getQuery(): \Elastica\Query
     {
         return $this->query;
-    }
-
-    /**
-     * @param string $key
-     * @param        $param
-     *
-     * @return \Galexth\ElasticsearchOdm\Builder
-     */
-    public function addOption(string $key, $param): self
-    {
-        $this->options[$key] = $param;
-        return $this;
-    }
-
-    /**
-     * @param array $options
-     *
-     * @return Builder
-     */
-    public function setOptions(array $options): Builder
-    {
-        if ($options) {
-            $this->options = $options;
-        }
-
-        return $this;
     }
 
 }
