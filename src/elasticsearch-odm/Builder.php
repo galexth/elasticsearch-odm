@@ -3,6 +3,7 @@
 namespace Galexth\ElasticsearchOdm;
 
 use Elastica\Client;
+use Elastica\Exception\NotFoundException;
 use Elastica\Query;
 use Elastica\Result;
 use Elasticsearch\Endpoints\UpdateByQuery;
@@ -340,14 +341,18 @@ class Builder
         $this->checkAccess();
 
         if ($id) {
-            $response = $this->getTypeInstance()->deleteById($id, $params);
+            try {
+                $response = $this->getTypeInstance()->deleteById($id, $params);
+                return (int) ($response->getData()['result'] == 'deleted');
+            } catch (NotFoundException $e) {
+                return 0;
+            }
         } elseif ($this->getQuery()->count()) {
             $response = $this->getTypeInstance()->deleteByQuery($this->getQuery(), $params);
-        } else {
-            throw new InvalidException('Query or id are required.');
+            return $response->getData()['deleted'];
         }
 
-        return $response->getData()['deleted'];
+        throw new InvalidException('Query or id are required.');
     }
 
     /**
