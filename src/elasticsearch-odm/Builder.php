@@ -280,17 +280,17 @@ class Builder
 
     /**
      * @param string $id
-     * @param array  $attributes
+     * @param array  $body
      * @param array  $options
      *
      * @return \Elastica\Response
      * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    public function updateById(string $id, array $attributes, array $options = [])
+    public function updateById(string $id, array $body, array $options = [])
     {
         $this->checkAccess();
 
-        $response = $this->client->updateDocument($id, $attributes,
+        $response = $this->client->updateDocument($id, $body,
             $this->model->getIndex(), $this->model->getType(), $options
         );
 
@@ -298,25 +298,25 @@ class Builder
     }
 
     /**
-     * @param array $script
+     * @param array $body
      * @param array $params
+     * @param array $slice
      *
      * @return mixed
      * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      * @throws \Galexth\ElasticsearchOdm\Exceptions\InvalidException
      */
-    public function update(array $script, array $params = [])
+    public function update(array $body, array $params = [])
     {
         $this->checkAccess();
 
         if (! $this->getQuery()->count()) {
-            throw new InvalidException('Invalid query.');
+            throw new InvalidException('Query is required.');
         }
 
-        $body = [
-            'query' => $this->getQuery()->getQuery()->toArray(),
-            'script' => $script,
-        ];
+        if (empty($body['query'])) {
+            $body['query'] = $this->getQuery()->getQuery()->toArray();
+        }
 
         $endpoint = new UpdateByQuery();
         $endpoint->setBody($body);
@@ -344,7 +344,7 @@ class Builder
         } elseif ($this->getQuery()->count()) {
             $response = $this->getTypeInstance()->deleteByQuery($this->getQuery(), $params);
         } else {
-            throw new InvalidException('Invalid query.');
+            throw new InvalidException('Query or id are required.');
         }
 
         return $response->getData()['deleted'];
