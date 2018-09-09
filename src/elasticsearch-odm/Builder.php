@@ -311,11 +311,11 @@ class Builder
     {
         $this->checkAccess();
 
-        if (! $this->getQuery()->count()) {
-            throw new InvalidException('Query is required.');
-        }
-
         if (empty($body['query'])) {
+            if (! $this->getQuery()->count()) {
+                throw new InvalidException('Query is required.');
+            }
+
             $body['query'] = $this->getQuery()->getQuery()->toArray();
         }
 
