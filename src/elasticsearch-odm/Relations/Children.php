@@ -23,7 +23,7 @@ class Children extends Relation
         }, $models));
 
         if (! $ids) {
-            return new Collection();
+            return $this->related->newCollection();
         }
 
         return $this->query->setQuery(new HasParent(new Terms('_id', $ids), $this->related->getType()))

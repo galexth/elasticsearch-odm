@@ -47,7 +47,7 @@ class Nested extends Relation
         }, $models)))));
 
         if (! $ids) {
-            return collect([]);
+            return $this->related->newCollection();
         }
 
         return $this->query->setQuery(new Ids($ids))->setSize(count($ids))->get();

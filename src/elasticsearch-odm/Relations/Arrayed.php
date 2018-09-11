@@ -47,7 +47,7 @@ class Arrayed extends Relation
         }, $models)))));
 
         if (! $ids) {
-            return new Collection();
+            return $this->related->newCollection();
         }
 
         return $this->query->setQuery(new Ids($ids))->setSize(count($ids))->get();
