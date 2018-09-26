@@ -569,6 +569,8 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
             if ($this->usesTimestamps()) {
                 $this->updateTimestamps();
+
+                $dirty[static::UPDATED_AT] = $this->{static::UPDATED_AT};
             }
 
             $response = $query->updateById($this->getId(), ['doc' => $dirty], $options);
