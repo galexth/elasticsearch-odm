@@ -111,6 +111,26 @@ class Builder
     }
 
     /**
+     * @param int $size
+     *
+     * @return \Galexth\ElasticsearchOdm\Builder
+     */
+    public function take(int $size)
+    {
+        return $this->setSize($size);
+    }
+
+    /**
+     * @param int $offset
+     *
+     * @return \Galexth\ElasticsearchOdm\Builder
+     */
+    public function from(int $offset = 0)
+    {
+        return $this->setFrom($offset);
+    }
+
+    /**
      * @param array $with
      * @return $this
      */
