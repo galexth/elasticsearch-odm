@@ -10,6 +10,7 @@ use Galexth\ElasticsearchOdm\Concerns\HasTimestamps;
 use Galexth\ElasticsearchOdm\Concerns\ValidatesAttributes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as BaseCollection;
 use JsonSerializable;
@@ -248,6 +249,35 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function getAttributes()
     {
         return $this->attributes;
+    }
+
+    /**
+     * Get the model's original attribute values.
+     *
+     * @param  string|null  $key
+     * @param  mixed  $default
+     * @return mixed|array
+     */
+    public function getOriginal($key = null, $default = null)
+    {
+        return Arr::get($this->original, $key, $default);
+    }
+
+    /**
+     * Get a subset of the model's attributes.
+     *
+     * @param  array|mixed  $attributes
+     * @return array
+     */
+    public function only(array $attributes)
+    {
+        $results = [];
+
+        foreach ($attributes as $attribute) {
+            $results[$attribute] = $this->getAttribute($attribute);
+        }
+
+        return $results;
     }
 
     /**
