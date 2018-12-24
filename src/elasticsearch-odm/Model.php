@@ -213,12 +213,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
-     * @param string                               $relation
-     * @param \Galexth\ElasticsearchOdm\Collection $models
+     * @param string $relation
+     * @param mixed  $models
      *
      * @return \Galexth\ElasticsearchOdm\Model
      */
-    public function addRelation(string $relation, Collection $models): Model
+    public function addRelation(string $relation, $models): Model
     {
         $this->relations[$relation] = $models;
         return $this;
