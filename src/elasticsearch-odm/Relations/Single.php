@@ -42,9 +42,9 @@ class Single extends Relation
      */
     public function getEager(array $models, string $relation): Collection
     {
-        $ids = array_unique(array_filter(array_map(function ($model) use ($relation) {
+        $ids = array_values(array_unique(array_filter(array_map(function ($model) use ($relation) {
             return $model->{$relation}[$this->foreignKey] ?? null;
-        }, $models)));
+        }, $models))));
 
         if (! $ids) {
             return $this->related->newCollection();
