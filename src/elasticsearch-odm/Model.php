@@ -1251,8 +1251,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function relationsToArray()
     {
-        return array_map(function (Arrayable $relation) {
-            return $relation->toArray();
+        return array_map(function ($relation) {
+            /** @var Arrayable $relation */
+            return $relation ? $relation->toArray() : null;
         }, $this->getArrayableRelations());
     }
 
