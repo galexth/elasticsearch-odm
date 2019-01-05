@@ -806,6 +806,41 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
+     * Reload a fresh model instance from the index.
+     *
+     * @param  array $with
+     * @return static|null
+     */
+    public function fresh(array $with = [])
+    {
+        if (! $this->exists) {
+            return null;
+        }
+
+        return static::with($with)->find($this->getId());
+    }
+
+    /**
+     * Reload the current model instance with fresh attributes from the index.
+     *
+     * @return $this
+     */
+    public function refresh()
+    {
+        if (! $this->exists) {
+            return $this;
+        }
+
+        $this->setRawAttributes(
+            static::findOrFail($this->getId())->getAttributes()
+        );
+
+        $this->syncOriginal();
+
+        return $this;
+    }
+
+    /**
      * @param Result $result
      *
      * @return \Illuminate\Support\Collection|static
