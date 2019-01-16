@@ -19,9 +19,9 @@ trait ValidatesAttributes
     }
 
     /**
-     * @return void
+     * @param array $attributes
      */
-    public function validate()
+    public function validate(array $attributes)
     {
         //
     }

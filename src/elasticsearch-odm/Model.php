@@ -559,7 +559,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         }
 
         if ($validate) {
-            $this->validate();
+            $this->validate($this->attributes);
         }
 
         $builder = $this->newBuilder();
