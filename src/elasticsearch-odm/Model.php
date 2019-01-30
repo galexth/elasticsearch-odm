@@ -38,7 +38,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     /**
      * @var string
      */
-    protected $type;
+    protected $type = '_doc';
 
     /**
      * @var array
