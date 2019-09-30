@@ -7,6 +7,7 @@ use Galexth\ElasticsearchOdm\Collection;
 use Galexth\ElasticsearchOdm\Model;
 use Galexth\ElasticsearchOdm\Relation;
 use Elastica\Query\Ids;
+use Illuminate\Support\Arr;
 
 class Arrayed extends Relation
 {
@@ -42,7 +43,7 @@ class Arrayed extends Relation
      */
     public function getEager(array $models, string $relation): Collection
     {
-        $ids = array_filter(array_values(array_unique(array_collapse(array_map(function ($model) use ($relation) {
+        $ids = array_filter(array_values(array_unique(Arr::collapse(array_map(function ($model) use ($relation) {
             return $model->{$relation};
         }, $models)))));
 
