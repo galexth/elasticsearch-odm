@@ -558,16 +558,12 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
             return false;
         }
 
-        if ($validate) {
-            $this->validate($this->attributes);
-        }
-
         $builder = $this->newBuilder();
 
         if ($this->exists) {
-            $saved = $this->performUpdate($builder, $options);
+            $saved = $this->performUpdate($builder, $options, $validate);
         } else {
-            $saved = $this->performInsert($builder, $options);
+            $saved = $this->performInsert($builder, $options, $validate);
         }
 
         if ($saved) {
@@ -583,14 +579,19 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      *
      * @param \Galexth\ElasticsearchOdm\Builder $query
      * @param array                             $options
+     * @param bool                              $validate
      *
      * @return bool
      * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    protected function performUpdate(Builder $query, array $options = [])
+    protected function performUpdate(Builder $query, array $options = [], bool $validate = false)
     {
         if ($this->fireModelEvent('updating') === false) {
             return false;
+        }
+
+        if ($validate) {
+            $this->validate($this->attributes);
         }
 
         $dirty = $this->getDirty();
@@ -625,14 +626,19 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      *
      * @param \Galexth\ElasticsearchOdm\Builder $query
      * @param array                             $options
+     * @param bool                              $validate
      *
      * @return bool
      * @throws \Galexth\ElasticsearchOdm\Exceptions\AccessDenied
      */
-    protected function performInsert(Builder $query, array $options = [])
+    protected function performInsert(Builder $query, array $options = [], bool $validate = false)
     {
         if ($this->fireModelEvent('creating') === false) {
             return false;
+        }
+
+        if ($validate) {
+            $this->validate($this->attributes);
         }
 
         if ($this->usesTimestamps()) {
